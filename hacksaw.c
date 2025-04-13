@@ -22,10 +22,8 @@ int main(int argc, char** argv){
     }
     char outfile_final[200];
     infile_chunk_cnt = ((full->bufsize / (8 * MB)) + 1);
-    printf("chunk count: %d\n", infile_chunk_cnt);
     ByteArray* arr[infile_chunk_cnt]; 
     final_chunk_size = full->bufsize - ((8 * MB) * (infile_chunk_cnt - 1));
-    printf("%d\n", final_chunk_size);
     // last chunk will often not be 8mb flat, allocate it separately.
     for (size_t i = 0; i < infile_chunk_cnt - 1; ++i){
         arr[i] = create_empty_byte_array(8 * MB);
@@ -35,7 +33,7 @@ int main(int argc, char** argv){
     memcpy(arr[infile_chunk_cnt - 1]->buf, full->buf + ((infile_chunk_cnt - 1) * MB), final_chunk_size);
     cleanup_bytearray(&full);
     for (size_t i = 0; i < infile_chunk_cnt; ++i){
-        sprintf(outfile_final, "%d_%s.chk", i, outfile);
+        sprintf(outfile_final, "%zu_%s.chk", i, outfile);
         byte_array_to_file(arr[i], outfile_final);
         cleanup_bytearray(&arr[i]);
     }
