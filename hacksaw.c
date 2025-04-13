@@ -33,7 +33,7 @@ int main(int argc, char** argv){
     memcpy(arr[infile_chunk_cnt - 1]->buf, full->buf + ((infile_chunk_cnt - 1) * MB), final_chunk_size);
     cleanup_bytearray(&full);
     for (size_t i = 0; i < infile_chunk_cnt; ++i){
-        sprintf(outfile_final, "%zu_%s.chk", i, outfile);
+        sprintf(outfile_final, "%s_%zu.chk", outfile, i);
         byte_array_to_file(arr[i], outfile_final);
         cleanup_bytearray(&arr[i]);
     }
