@@ -32,8 +32,12 @@ int main(int argc, char** argv){
     arr[infile_chunk_cnt - 1] = create_empty_byte_array(final_chunk_size);
     memcpy(arr[infile_chunk_cnt - 1]->buf, full->buf + ((infile_chunk_cnt - 1) * MB), final_chunk_size);
     cleanup_bytearray(&full);
+    char toappend = 0x61;
     for (size_t i = 0; i < infile_chunk_cnt; ++i){
-        sprintf(outfile_final, "%s_%zu.chk", outfile, i);
+        if (toappend + i == 0x7A){
+            toappend = 0x41;
+        }
+        sprintf(outfile_final, "%c_%s.chk", toappend + i, outfile);
         byte_array_to_file(arr[i], outfile_final);
         cleanup_bytearray(&arr[i]);
     }
