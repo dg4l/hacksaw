@@ -2,25 +2,35 @@
 #include <math.h>
 #include <string.h>
 #include "bytearray.h"
+#include "tinyfiledialogs.h"
 #define MB 1000000
 
 int main(int argc, char** argv){
-    size_t infile_chunk_cnt = 0;
-    size_t final_chunk_size = 0;
+    char* in;
+    char* outfile;
     if (argc < 2){
-        printf("USAGE: %s {in} {out}\n", argv[0]);
+        in = tinyfd_openFileDialog("Select File to Split", "./", 0, NULL, NULL, 0);
+    }
+    else{
+        in = argv[1];
+    }
+    if (!in){
+        fprintf(stderr, "ERROR: filename invalid!\n");
         return -1;
     }
-    char* outfile = argv[1]; 
-    if (argc > 3){
+    outfile = in;
+    if (argc == 3){
         outfile = argv[2];
     }
-    ByteArray* full = file_to_byte_array(argv[1]); 
+    printf("%s\n", in);
+    size_t infile_chunk_cnt = 0;
+    size_t final_chunk_size = 0;
+    ByteArray* full = file_to_byte_array(in);
     if (!full){
-        fprintf(stderr, "file %s not found\n", argv[1]);
+        fprintf(stderr, "error opening file %s\n", in);
         return -1;
     }
-    char outfile_final[200];
+    char outfile_final[0xFF];
     infile_chunk_cnt = ((full->bufsize / (8 * MB)) + 1);
     ByteArray* arr[infile_chunk_cnt]; 
     final_chunk_size = full->bufsize - ((8 * MB) * (infile_chunk_cnt - 1));
@@ -32,12 +42,12 @@ int main(int argc, char** argv){
     arr[infile_chunk_cnt - 1] = create_empty_byte_array(final_chunk_size);
     memcpy(arr[infile_chunk_cnt - 1]->buf, &full->buf[(infile_chunk_cnt - 1) * (MB * 8)], final_chunk_size);
     cleanup_bytearray(&full);
-    char toappend = 0x41;
+    char suffix = 0x41;
     for (size_t i = 0; i < infile_chunk_cnt; ++i){
-        if (toappend + i == 0x5A){
-            toappend = 0x61;
+        if (suffix + i == 0x5A){
+            suffix = 0x61;
         }
-        sprintf(outfile_final, "%c_%s.chk", toappend + i, outfile);
+        sprintf(outfile_final, "%s_%c.chk", outfile, suffix + i);
         byte_array_to_file(arr[i], outfile_final);
         cleanup_bytearray(&arr[i]);
     }
